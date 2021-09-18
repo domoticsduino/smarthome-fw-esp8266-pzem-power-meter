@@ -7,7 +7,7 @@
 	branch = master
 [submodule "lib/smarthome-fw-lib-esp8266-ddmqtt"]
 	path = lib/smarthome-fw-lib-esp8266-ddmqtt
-	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddwmqtt
+	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddmqtt
 	branch = master
 [submodule "lib/smarthome-fw-lib-esp8266-ddpzem004t"]
 	path = lib/smarthome-fw-lib-esp8266-ddpzem004t
