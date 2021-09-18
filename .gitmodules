@@ -1,15 +1,15 @@
 [submodule "lib/smarthome-fw-lib-esp8266-ddcommon"]
 	path = lib/smarthome-fw-lib-esp8266-ddcommon
-	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddcommon.git
+	url = git@github.com:domoticsduino/smarthome-fw-esp8266-ddcommon
 [submodule "lib/smarthome-fw-lib-esp8266-ddwifi"]
 	path = lib/smarthome-fw-lib-esp8266-ddwifi
-	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddwifi.git
+	url = git@github.com:domoticsduino/smarthome-fw-esp8266-ddwifi
 	branch = master
 [submodule "lib/smarthome-fw-lib-esp8266-ddmqtt"]
 	path = lib/smarthome-fw-lib-esp8266-ddmqtt
-	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddmqtt.git
+	url = git@github.com:domoticsduino/smarthome-fw-esp8266-ddwmqtt
 	branch = master
 [submodule "lib/smarthome-fw-lib-esp8266-ddpzem004t"]
 	path = lib/smarthome-fw-lib-esp8266-ddpzem004t
-	url = git@github.com:domoticsduino/smarthome-fw-lib-esp8266-ddpzem004t.git
+	url = git@github.com:domoticsduino/smarthome-fw-esp8266-ddpzem004t
 	branch = master
