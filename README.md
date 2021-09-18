@@ -14,6 +14,9 @@ Depends on the following *dd libraries*:
  - ddmqtt
  - ddpzem004t
 
-To build your firmware bin file, rename file *src/user-config-template.h* in *src/user-config.h* and set your **WIFI** and **MQTT** settings.
-
+To build your firmware bin file:
+ - clone this repository with the *--recursive* flag to checkout **dd-libraries**
+ - rename file *src/user-config-template.h* in *src/user-config.h*
+ - set your **WIFI** and **MQTT** settings in file *src/user-config.h*
+ 
 Firmware file will be in ***.pio/build/esp12e/firmware.bin***
