@@ -1,0 +1,35 @@
+/* 1.0.0 VERSION */
+
+#ifndef config_h
+#define config_h
+
+// USER SETTINGS
+#include "user-config.h"
+
+// GENERAL SETTINGS
+#define READ_INTERVAL 2000 //ms
+#define MAX_SAMPLES 30
+#define DIFF_POWER_TRIGGER 2 //W
+#define LEDSTATUSPIN 2 //BUILTIN
+#define SERIAL_BAUDRATE 9600
+
+// PZEM SETTINGS
+#define PZEMPIN1 4 // PZEM PIN SERIAL IN
+#define PZEMPIN2 5 // PZEM PIN SERIAL OUT
+
+// WIFI SETTINGS (see user-config.h)
+const char *ssid = USER_SETTINGS_WIFI_SSID;
+const char *password = USER_SETTINGS_WIFI_PASSWORD;
+const char *wifihostname = USER_SETTINGS_WIFI_HOSTNAME;
+
+// MQTT SETTINGS (see user-config.h)
+const char MQTT_HOST[] = USER_SETTINGS_MQTT_HOST;
+int MQTT_PORT = USER_SETTINGS_MQTT_PORT;
+const char TOPIC_P[] = USER_SETTINGS_MQTT_TOPIC_P;
+const char TOPIC_S[] = USER_SETTINGS_MQTT_TOPIC_S;
+const char DEVICE[] = USER_SETTINGS_MQTT_DEVICE;
+const char MQTT_USER[] = USER_SETTINGS_MQTT_USER;
+const char MQTT_PWD[] = USER_SETTINGS_MQTT_PWD;
+int MQTT_QOS = USER_SETTINGS_MQTT_QOS;
+
+#endif
