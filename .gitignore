@@ -14,4 +14,4 @@
 .history
 .ionide
 lib/readme.txt
-src/user-config.h
+include/user-config.h

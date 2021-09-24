@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-#include "config.h"
+#include "../include/config.h"
 
 #include <ddcommon.h>
 #include <ddwifi.h>
