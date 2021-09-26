@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
 
 #include "../include/config.h"
 
@@ -25,80 +28,110 @@ float lastPowerTriggerValue;
 
 //JSON
 DynamicJsonBuffer jsonBuffer;
-JsonObject& configRoot = jsonBuffer.createObject();
-JsonObject& root = jsonBuffer.createObject();
+JsonObject &jsonRoot = jsonBuffer.createObject();
+JsonObject &configRoot = jsonRoot.createNestedObject("config");
+JsonObject &powerJson = jsonRoot.createNestedObject("power");
+JsonObject &jsonInfo = jsonRoot.createNestedObject("info");
+
+// WEB SERVER - OTA
+AsyncWebServer server(80);
 
 unsigned long startMillis;
 
-void createJsonConfig(){
-    configRoot["readInterval"] = READ_INTERVAL;
-    configRoot["maxSamples"] = MAX_SAMPLES;
+void createJsonConfig()
+{
+	configRoot["readInterval"] = READ_INTERVAL;
+	configRoot["maxSamples"] = MAX_SAMPLES;
 }
 
-void printDebugPowerData(DDPZEM004TVal values){
-    writeToSerial("POWER READ Success = ", false);
-    writeToSerial(values.success ? "True" : "False", true);
-    if(values.success){
-        writeToSerial("Voltage: ", false);
-        writeToSerial(values.voltage, false);
-        writeToSerial(" V ", true);
-        writeToSerial("Current: ", false);
-        writeToSerial(values.current, false);
-        writeToSerial(" A ", true);
-        writeToSerial("Power: ", false);
-        writeToSerial(values.power, false);
-        writeToSerial(" W ", true);
-        writeToSerial("Energy: ", false);
-        writeToSerial(values.energy, false);
-        writeToSerial(" Wh ", true);
-    }
-}   
-
-String generateJsonMessage(DDPZEM004TVal values){
-    root["voltage"] = values.voltage;
-    root["current"] = values.current;
-    root["power"] = values.power;
-    root["energy"] = values.energy;
-    String json;
-    root.printTo(json);
-    return json;
+void printDebugPowerData(DDPZEM004TVal values)
+{
+	writeToSerial("POWER READ Success = ", false);
+	writeToSerial(values.success ? "True" : "False", true);
+	if (values.success)
+	{
+		writeToSerial("Voltage: ", false);
+		writeToSerial(values.voltage, false);
+		writeToSerial(" V ", true);
+		writeToSerial("Current: ", false);
+		writeToSerial(values.current, false);
+		writeToSerial(" A ", true);
+		writeToSerial("Power: ", false);
+		writeToSerial(values.power, false);
+		writeToSerial(" W ", true);
+		writeToSerial("Energy: ", false);
+		writeToSerial(values.energy, false);
+		writeToSerial(" Wh ", true);
+	}
 }
 
-void setup() {
-    createJsonConfig();    
-    pinMode(LEDSTATUSPIN, OUTPUT);
-    digitalWrite(LEDSTATUSPIN, LOW);
-    if(SERIAL_ENABLED)
-        Serial.begin(SERIAL_BAUDRATE);
-    writeToSerial("ESP8266MCU12 Booting...", true);
-		writeToSerial("FW Version: ", false);
-		writeToSerial(AUTO_VERSION, true);
-
-    // WIFI
-    wifi.connect();
-
-    //MQTT
-    clientMqtt.reconnectMQTT(&startMillis);
-
-    //PZEM
-    pzemWrapper.init(&pzemPower, ipPower);
-
-    lastPowerTriggerValue = -999.0;
-    startMillis = millis();
+String generateJsonMessagePower(DDPZEM004TVal values)
+{
+	powerJson["voltage"] = values.voltage;
+	powerJson["current"] = values.current;
+	powerJson["power"] = values.power;
+	powerJson["energy"] = values.energy;
+	String json;
+	powerJson.printTo(json);
+	return json;
 }
 
-void loop() {
+String generateJsonMessageRoot()
+{
+	String json;
+	jsonRoot.printTo(json);
+	return json;
+}
 
-    // Wait a few seconds between measurements.
-    if(myDelay(configRoot["readInterval"], &startMillis)){
-        clientMqtt.loop();
-        DDPZEM004TVal values = pzemWrapper.getValues(&pzemPower, ipPower);
-        printDebugPowerData(values);
-        writeToSerial("lastPowerTriggerValue ", false);
-        writeToSerial(lastPowerTriggerValue, true);
-        if(abs(lastPowerTriggerValue - values.power) >= DIFF_POWER_TRIGGER || (lastPowerTriggerValue != values.power && values.power == 0)){
-            clientMqtt.sendMessage(TOPIC_P, generateJsonMessage(values), &startMillis);
-            lastPowerTriggerValue = values.power;
-        }
-    }
+void setup()
+{
+	createJsonConfig();
+	pinMode(LEDSTATUSPIN, OUTPUT);
+	digitalWrite(LEDSTATUSPIN, LOW);
+	if (SERIAL_ENABLED)
+		Serial.begin(SERIAL_BAUDRATE);
+	writeToSerial(USER_SETTINGS_WIFI_HOSTNAME, false);
+	writeToSerial(" Booting...", true);
+	writeToSerial("FW Version: ", false);
+	writeToSerial(AUTO_VERSION, true);
+
+	// WIFI
+	wifi.connect();
+
+	//MQTT
+	clientMqtt.reconnectMQTT(&startMillis);
+
+	//WEB SERVER
+	jsonInfo["name"] = USER_SETTINGS_WIFI_HOSTNAME;
+	jsonInfo["version"] = AUTO_VERSION;
+	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+		request->send(200, "application/json", generateJsonMessageRoot());
+	});
+	AsyncElegantOTA.begin(&server);
+	server.begin();
+	writeToSerial("Http server started", true);
+
+	//PZEM
+	pzemWrapper.init(&pzemPower, ipPower);
+	lastPowerTriggerValue = -999.0;
+	startMillis = millis();
+}
+
+void loop()
+{
+	AsyncElegantOTA.loop();
+	// Wait a few seconds between measurements.
+	if (myDelay(configRoot["readInterval"], &startMillis))
+	{
+		clientMqtt.loop();
+		DDPZEM004TVal values = pzemWrapper.getValues(&pzemPower, ipPower);
+		printDebugPowerData(values);
+		writeToSerial("lastPowerTriggerValue ", false);
+		writeToSerial(lastPowerTriggerValue, true);
+		if (abs(lastPowerTriggerValue - values.power) >= DIFF_POWER_TRIGGER || (lastPowerTriggerValue != values.power && values.power == 0))
+		{
+			clientMqtt.sendMessage(TOPIC_P, generateJsonMessagePower(values), &startMillis);
+			lastPowerTriggerValue = values.power;
+		}
+	}
 }

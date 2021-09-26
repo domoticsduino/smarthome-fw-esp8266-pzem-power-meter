@@ -21,9 +21,16 @@ To build your firmware bin file:
  
 Firmware file will be in ***.pio/build/esp12e/firmware.bin***
 
+## OTA / WebServer support
+
+To upload using OTA, open *http://ip-device/update* on a browser and point to the firmware \*.bin file
+
+Open *http://ip-device* to get sensor state and device info in your browser
+
 ## Branches
  - ***main*** contains work in progress commits - **NOT STABLE branch**
  - ***master*** contains **STABLE** commits and releases
 
 ## Credits
  - *For autoversion management script* => **PlatformIO forum** ["How to build got revision into binary for version output?"](https://community.platformio.org/t/how-to-build-got-revision-into-binary-for-version-output/15380/5)
+ - *For OTA/WebServer support* => **randomnerdtutorials.com** [ESP8266 NodeMCU OTA (Over-the-Air) Updates - AsyncElegantOTA (VS Code + PlatformIO)](https://randomnerdtutorials.com/esp8266-nodemcu-ota-over-the-air-vs-code), **[AsyncElegantOTA Library](https://github.com/ayushsharma82/AsyncElegantOTA)**
