@@ -99,7 +99,7 @@ void setup()
 	wifi.connect();
 
 	//MQTT
-	clientMqtt.reconnectMQTT(&startMillis);
+	clientMqtt.reconnectMQTT();
 
 	//WEB SERVER
 	jsonInfo["name"] = USER_SETTINGS_WIFI_HOSTNAME;
@@ -121,17 +121,15 @@ void loop()
 {
 	AsyncElegantOTA.loop();
 	// Wait a few seconds between measurements.
-	if (myDelay(configRoot["readInterval"], &startMillis))
+	delay(configRoot["readInterval"]);
+	clientMqtt.loop();
+	DDPZEM004TVal values = pzemWrapper.getValues(&pzemPower, ipPower);
+	printDebugPowerData(values);
+	writeToSerial("lastPowerTriggerValue ", false);
+	writeToSerial(lastPowerTriggerValue, true);
+	if (abs(lastPowerTriggerValue - values.power) >= DIFF_POWER_TRIGGER || (lastPowerTriggerValue != values.power && values.power == 0))
 	{
-		clientMqtt.loop();
-		DDPZEM004TVal values = pzemWrapper.getValues(&pzemPower, ipPower);
-		printDebugPowerData(values);
-		writeToSerial("lastPowerTriggerValue ", false);
-		writeToSerial(lastPowerTriggerValue, true);
-		if (abs(lastPowerTriggerValue - values.power) >= DIFF_POWER_TRIGGER || (lastPowerTriggerValue != values.power && values.power == 0))
-		{
-			clientMqtt.sendMessage(TOPIC_P, generateJsonMessagePower(values), &startMillis);
-			lastPowerTriggerValue = values.power;
-		}
+		clientMqtt.sendMessage(TOPIC_P, generateJsonMessagePower(values));
+		lastPowerTriggerValue = values.power;
 	}
 }
